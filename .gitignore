@@ -1,2 +1,7 @@
 /bin/
 *.class
+java/libs/
+java/libs/*.jar
+java/src/Conf/.classpath
+java/src/Conf/.project
+java/src/Conf/.gitignore
