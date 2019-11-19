@@ -19,6 +19,7 @@ public class Conf {
 		try {
 		  switch(bef) {
 		  case "nutzer": regelNutzer(cmd); break;
+		  case "gruppe": regelGruppe(cmd); break;
 		  default: Config.syntax("Unbekannter Befehl:"+bef);
 		  }
 		} catch(SQLException e) { dbError("Datenbanfehler",e);}
@@ -40,7 +41,20 @@ public class Conf {
 		case "pass": Nutzer.setPass(cmd); break;
 		case "del": Nutzer.loeschen(cmd); break;
 		case "show": Nutzer.zeigen(cmd); break;
+		case "addgruppe": Nutzer.addGruppe(cmd); break;
+		case "delgruppe": Nutzer.delGruppe(cmd); break;
 		default: Config.syntax("Unbekannter nutzer-Befehl:"+bef);
+		}
+	}
+
+	public static void regelGruppe(CmdLine cmd) throws SQLException{
+		checkAdmin();
+		String bef=cmd.getSl(1);
+		switch(bef) {
+		case "list": Gruppe.list(null); break;
+		case "addgruppe": Nutzer.addGruppe(cmd); break;
+		case "delgruppe": Nutzer.delGruppe(cmd); break;
+		default: Config.syntax("Unbekannter gruppe-Befehl:"+bef);
 		}
 	}
 

@@ -11,7 +11,7 @@ public class Nutzer {
 	protected ArrayList<Gruppe> gruppen;
 	Nutzer(){
 		nuId=null; nachname=vor1=vor2=vor3=login=kennwort=adName=bemerkung=null;
-		adId=0; isEna=false;
+		adId=null; isEna=false;
 		gruppen=null;
 	}
 	Nutzer(SqCursor c) throws SQLException{
@@ -40,10 +40,9 @@ public class Nutzer {
 			b.add(adId); b.add(adName); b.add(isEna); b.add(bemerkung);
 		} else {
 			b=new BindBef(Config.coInt);
-			b.addText("update public.Nutzer set NachName=?,Vor1=?,Vor2=?,Vor3=?,Login=?,Kennwort=?");
-			b.addText(",AdId=?,AdName=?,isEna=?,Bemerkung=? where NuId=?");
+			b.addText("update public.Nutzer set NachName=?,Vor1=?,Vor2=?,Vor3=?,Login=?,Kennwort=?,");
+			b.addText("AdId=?,AdName=?,isEna=?,Bemerkung=? where NuId=?");
 			b.prepare();
-			nuId=Config.coInt.getI("select coalesce(max(NuId),0)+1 from public.Nutzer");
 			b.add(nachname); b.add(vor1); b.add(vor2); b.add(vor3); b.add(login); b.add(kennwort);
 			b.add(adId); b.add(adName); b.add(isEna); b.add(bemerkung); b.add(nuId);
 		}
@@ -110,10 +109,10 @@ public class Nutzer {
 		System.out.println(s);
 	}
 	
-	public void zeigen() {
+	public void zeigen() throws SQLException {
 		po("Anzeige Benutzer\n-----------------------------\n");
 		po("              Status: ");
-		if (isEna) po("Benutzer ist aktiv"); else	pn("Benutzer ist abgeschaltet");
+		if (isEna) po("Benutzer ist aktiv"); else po("Benutzer ist abgeschaltet");
 		pn(" (-ena / -dis)");
 		pn("   Nutzer Id (-nuid): "+nuId);
 		pn("      Nachname (-na): "+nachname);
@@ -123,7 +122,7 @@ public class Nutzer {
 		pn("         Login (-lo): "+login);
 		pn("Active Dir (-adName): "+adName+" auf (-ad):"+adId);
 		pn("     Bemerkung (-be): "+bemerkung);
-		
+		Gruppe.list(nuId);
 	}
 	
 	public static String crypt(String ein) {
@@ -153,13 +152,23 @@ public class Nutzer {
 		return u;
 	}
 	
-	public static void list() throws SQLException {
+	public static void listalt() throws SQLException {
 		SqCursor c=new SqCursor(Config.coInt);
 		System.out.println(" Id  Nachname                       Vorname 1       Login lokal     Name in der Active Directory");
 		System.out.println("---- ------------------------------ --------------- --------------- ----------------------------");
 		for (c.open("select NuId,Nachname,Vor1,Login,adName from public.Nutzer order by NuId");c.next();) {
 			System.out.print(String.format("%4d %-30s %-15s %-15s %s\n",c.geti(1),c.getS(2),c.getS(3),c.getS(4),c.getS(5)));
 		}
+	}
+	
+	public static void list() throws SQLException {
+		SqCursor c=new SqCursor(Config.coInt);
+		SpaltenTab t=new SpaltenTab();
+		t.addKopfi("Id "); t.addKopf("Nachname "); t.addKopf("Vorname 1 "); t.addKopf("Login lokal "); t.addKopf("Name in der Ad ");
+		for (c.open("select NuId,Nachname,Vor1,Login,adName from public.Nutzer order by NuId");c.next();) {
+			t.add(c.geti(1)); t.add(c.getS(2)); t.add(c.getS(3)); t.add(c.getS(4)); t.add(c.getS(5));
+		}
+		t.ausgabe();
 	}
 	
 	public static void neu(CmdLine cmd) throws SQLException{
@@ -184,6 +193,7 @@ public class Nutzer {
     	char[] pw2 = System.console().readPassword("Wiederholung: ");
     	u.kennwort=String.valueOf(pw1);
     	if (!u.kennwort.equals(String.valueOf(pw2))) Config.syntax("Die beiden Kennwörter stimmen nicht überein.");
+    	u.kennwort=crypt(u.kennwort);
     	u.sync();
 	}
 	
@@ -202,4 +212,19 @@ public class Nutzer {
 		u.zeigen();
 	}
 	
+	public static void addGruppe(CmdLine cmd) throws SQLException{
+		int nuid=cmd.geti("-nuid", -1);
+		if (nuid==-1) Config.syntax("Die Angabe der Benutzerid fehlt. Verwende -nuid");
+		int grid=cmd.geti("-grid", -1);
+		if (grid==-1) Config.syntax("Die Angabe der Gruppenid fehlt. Verwende -grid");
+		Config.coInt.Bef("insert into Rechte values("+nuid+","+grid+")");
+	}
+
+	public static void delGruppe(CmdLine cmd) throws SQLException{
+		int nuid=cmd.geti("-nuid", -1);
+		if (nuid==-1) Config.syntax("Die Angabe der Benutzerid fehlt. Verwende -nuid");
+		int grid=cmd.geti("-grid", -1);
+		if (grid==-1) Config.syntax("Die Angabe der Gruppenid fehlt. Verwende -grid");
+		Config.coInt.Bef("delete from Rechte where NuId="+nuid+" and GrId="+grid);
+	}
 }

@@ -77,6 +77,7 @@ class SqConn{
 * @param was Ein Text, der erhellend sein soll
 */
   public void deb(String wer,String was){
+	 //System.out.println("SQL:"+wer+", "+was);
     //Deb.sqd(DebName,wer,was);
   }
 
@@ -555,7 +556,7 @@ class BindBef{
 * Initialisiere Klasse und merke den Connector
 * @param aco Der Connector zur Datenbank
 */
-  BindBef(SqConn aco){ co=aco; Posi=0; }
+  BindBef(SqConn aco){ co=aco; Posi=0; Txt=""; }
 
 /**
 * Initialisiere Klasse, merke den Connector und setze direkt den Text fest. Es wird ein prepare geamcht, sodaß wir direkt mit add/set binden
@@ -667,12 +668,14 @@ class BindBef{
 /**
 * Führe den Befehl aus
 */
-  void exec(){
-//    deb("BindBef exec","");
-    try{ stmt.executeUpdate();}
-    catch(SQLException e){
-//      idl.pr("BindBef Exception:"+e.getMessage());
-    }
+  void exec() throws SQLException{
+	  try {
+		  stmt.executeUpdate();
+	  } catch (SQLException e) {
+		  e.printStackTrace();
+		  System.out.println("Statement:"+Txt);
+		  throw e;
+	  }
     Posi=1;
   }
 

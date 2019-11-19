@@ -50,4 +50,17 @@ public class Gruppe {
 			if (k.name.equals(name)) return k;
 		return null;
 	}
+	
+	static void list(Integer nuId) throws SQLException{
+		SqCursor c=new SqCursor(Config.coInt);
+		if (nuId!=null)
+		   c.open("select GrId,Name,Instanz,Art from public.DspGruppen where GrId in(select GrId from public.Rechte where NuId="+nuId+") order by 2");
+		else 
+			c.open("select GrId,Name,Instanz,Art from public.DspGruppen order by 2"); 
+		SpaltenTab t=new SpaltenTab("#Id","Name","Instanz","Art");
+		while (c.next()) {
+			t.add(c.geti(1)); t.add(c.getS(2)); t.add(c.getS(3)); t.add(c.getS(4));
+		}
+		t.ausgabe();		
+	}
 }
