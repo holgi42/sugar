@@ -1,5 +1,8 @@
 import java.sql.SQLException;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+
 public class Conf {
 
 	public static void dbError(String s,Exception e) {
@@ -14,6 +17,7 @@ public class Conf {
 	
 	public static void main(String[] args) {
 		CmdLine cmd=new CmdLine(args);
+		
 		Config.starte(cmd);
 		String bef=cmd.getSl(0);
 		try {

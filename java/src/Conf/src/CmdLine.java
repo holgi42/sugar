@@ -1,5 +1,3 @@
-
-
 /**
 * Einfache Hilfsklasse, um die Kommandozeile etwas besser zu verarbeiten
 */
